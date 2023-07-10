@@ -9,15 +9,27 @@ import UIKit
 
 class FavoritesTableViewCell: UITableViewCell {
 
+    @IBOutlet weak var descriptionLabel: UILabel!
+    @IBOutlet weak var headerLabel: UILabel!
+    @IBOutlet weak var coverImageView: UIImageView!
+    var article: FavArticleModel? {
+        didSet {
+            let imageURL = URL(string: article?.urlToImage ?? FavoritesTableViewCell.noImage)
+            coverImageView.setImage(with: imageURL)
+            headerLabel.text = article?.title
+            descriptionLabel.text = article?.articleDescription ?? "Description not found"
+        }
+    }
+    
     override func awakeFromNib() {
         super.awakeFromNib()
-        // Initialization code
+        article = nil
     }
-
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        article = nil
     }
+    
     
 }

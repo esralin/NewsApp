@@ -13,11 +13,14 @@ class NewsViewController: UIViewController {
     
     private var articles: [Article] = []
     
+    private let searchViewController = UISearchController(searchResultsController: nil)
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "News"
         setupTableView()
         getArticles()
+        createSearchBar()
     }
 }
 
@@ -32,10 +35,10 @@ private extension NewsViewController {
     }
     
     func getArticles() {
-        NetworkManager.shared.getArticles(completion: handleCategoriesResponse(response:))
+        NetworkManager.shared.getArticles(completion: handleArticlesResponse(response:))
     }
     
-    func handleCategoriesResponse(response: NewsResponse) {
+    func handleArticlesResponse(response: NewsResponse) {
         
         articles = response.articles
         
@@ -70,8 +73,32 @@ extension NewsViewController: UITableViewDataSource, UITableViewDelegate {
         
         DispatchQueue.main.async {
             let article = self.articles[indexPath.row]
-           // let viewController = ProductsViewController(category: category)
-           // self.navigationController?.pushViewController(viewController, animated: true)
+            let viewController = NewDetailsViewController(article: article)
+            self.navigationController?.pushViewController(viewController, animated: true)
+        }
+    }
+}
+
+extension NewsViewController: UISearchBarDelegate{
+    func createSearchBar() {
+        navigationItem.searchController = searchViewController
+        searchViewController.searchBar.delegate = self
+    }
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        guard let text = searchBar.text, !text.isEmpty else {
+            return
+        }
+        NetworkManager.shared.search(query: text, completion: handleSearchResponse(response:))
+    }
+    
+    func handleSearchResponse(response: NewsResponse) {
+        
+        articles = response.articles 
+        
+        DispatchQueue.main.async {
+            self.tableView.reloadData()
+            self.searchViewController.dismiss(animated: true, completion: nil)
         }
     }
 }
